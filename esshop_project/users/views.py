@@ -1,8 +1,10 @@
 from django.shortcuts import render, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import auth, messages
+from django.contrib.auth.decorators import login_required
 
 from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
+from products.models import Basket
 
 
 def login(request):
@@ -40,19 +42,29 @@ def register(request):
     return render(request, 'users/register.html', context)
 
 
+@login_required
 def profile(request):
+    user = request.user
     if request.method == 'POST':
-        form = UserProfileForm(data=request.POST, files=request.FILES, instance=request.user)
+        form = UserProfileForm(data=request.POST, files=request.FILES, instance=user)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('users:profile'))
     else:
-        form = UserProfileForm(instance=request.user)
+        form = UserProfileForm(instance=user)
+
+    baskets = Basket.objects.filter(user=user)
+    total_sum = sum(basket.sum() for basket in baskets)
+    total_quantity = sum(basket.quantity for basket in baskets)
     context = {
         'title': 'Enigma Style Shop -  Профиль',
-        'form': form
+        'form': form,
+        'baskets': baskets,
+        'total_sum': total_sum,
+        'total_quantity': total_quantity,
     }
     return render(request, 'users/profile.html', context)
+
 
 def logout(request):
     auth.logout(request)
