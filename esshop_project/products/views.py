@@ -15,13 +15,21 @@ def index(request):
 def products(request, category_id=None, page=1):
     context = {'title': 'ESShop - Каталог',
                'categories': ProductCategory.objects.all() }
+
     if category_id:
         products = Product.objects.filter(category_id=category_id)
     else:
-        products= Product.objects.all()
-    paginator = Paginator(products, 3)
+        products = Product.objects.all()
+
+    query = request.GET.get('q')
+    if query is not None:
+        finded_products = Product.objects.filter(name__icontains=query).order_by('-id')
+        paginator = Paginator(finded_products, 3)
+    else:
+        paginator = Paginator(products, 3)
+
     products_paginator = paginator.page(page)
-    context.update({'products': products_paginator})
+    context.update({'products': products_paginator, 'query': query})
     return render(request, 'products/products.html', context)
 
 

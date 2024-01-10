@@ -3,6 +3,7 @@
 
 {% block css %}
     <link href="{% static 'css/products.css' %}" rel="stylesheet">
+    <link href="{% static 'css/search.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -13,13 +14,18 @@
             <div class="col-lg-3">
 
                 <h1 class="my-4">Enigma Style</h1>
+
+                <form action="{% url 'products:search' %}" method="GET">
+                    <input type="text" name="q" placeholder="Поиск">
+                    <input type="submit" value="Поиск">
+                </form>
+
                 <div class="list-group">
                     {% for category in categories %}
                         <a href="{% url 'products:category' category.id %}"
                            class="list-group-item">{{ category.name }}</a>
                     {% endfor %}
                 </div>
-
             </div>
 
             <div class="col-lg-9">
